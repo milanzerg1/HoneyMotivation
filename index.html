@@ -825,13 +825,17 @@
             },
 
             showLoginScreen() {
+                console.log('showLoginScreen вызван');
                 document.getElementById('login-screen').classList.add('active');
                 document.getElementById('main-screen').classList.remove('active');
             },
 
             showMainScreen() {
+                console.log('showMainScreen вызван');
                 document.getElementById('login-screen').classList.remove('active');
                 document.getElementById('main-screen').classList.add('active');
+                console.log('login-screen active:', document.getElementById('login-screen').classList.contains('active'));
+                console.log('main-screen active:', document.getElementById('main-screen').classList.contains('active'));
             },
 
             updateUserInfo(user) {
