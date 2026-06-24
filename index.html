@@ -50,10 +50,13 @@
         }
 
         #login-screen {
-            display: flex;
             align-items: center;
             justify-content: center;
             background: linear-gradient(135deg, #f4a261 0%, #e9c46a 100%);
+        }
+
+        #login-screen.active {
+            display: flex;  /* ← Переносим display сюда */
         }
 
         .login-container {
