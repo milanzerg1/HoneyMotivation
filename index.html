@@ -955,7 +955,7 @@
         document.addEventListener('DOMContentLoaded', async () => {
             console.log('🍯 Honey Motivation загружается...');
 
-            // === СНАЧАЛА ВСЕГДА навешиваем обработчики ===
+            // === СНАЧАЛА навешиваем обработчики ===
 
             // Login form
             const loginForm = document.getElementById('login-form');
@@ -973,13 +973,20 @@
 
                     try {
                         console.log('Отправляем запрос на сервер...');
-                        await API.login(username, password);
-                        console.log('✅ Успешный вход');
+                        const loginResult = await API.login(username, password);
+                        console.log('✅ Успешный вход, токен получен');
+                        console.log('Токен:', loginResult.access_token ? 'есть' : 'нет');
 
+                        console.log('Загружаем профиль...');
                         const profile = await API.getProfile();
+                        console.log('✅ Профиль загружен:', profile);
+
                         API.setUser(profile);
+                        console.log('Показываем главный экран...');
                         UI.showMainScreen();
                         UI.updateUserInfo(profile);
+                        console.log('✅ Главный экран показан');
+
                         UI.showNotification('Добро пожаловать! 🍯', 'success');
                     } catch (error) {
                         console.error('❌ Ошибка входа:', error);
@@ -1045,6 +1052,32 @@
                     }
                 });
             });
+
+            // === ПОТОМ проверяем токен ===
+
+            const token = API.getToken();
+            console.log('Токен:', token ? 'есть' : 'нет');
+
+            if (!token) {
+                console.log('Показываем экран входа');
+                UI.showLoginScreen();
+                return;
+            }
+
+            try {
+                console.log('Загружаем профиль...');
+                const profile = await API.getProfile();
+                console.log('✅ Профиль загружен:', profile);
+                API.setUser(profile);
+                console.log('Показываем главный экран...');
+                UI.showMainScreen();
+                UI.updateUserInfo(profile);
+                console.log('✅ Главный экран показан');
+            } catch (error) {
+                console.error('❌ Ошибка загрузки профиля:', error);
+                UI.showLoginScreen();
+            }
+        });
 
             // === ПОСЛЕ навешивания обработчиков проверяем токен ===
 
