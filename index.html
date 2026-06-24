@@ -955,26 +955,7 @@
         document.addEventListener('DOMContentLoaded', async () => {
             console.log('🍯 Honey Motivation загружается...');
 
-            const token = API.getToken();
-            console.log('Токен:', token ? 'есть' : 'нет');
-
-            if (!token) {
-                console.log('Показываем экран входа');
-                UI.showLoginScreen();
-                return;
-            }
-
-            try {
-                console.log('Загружаем профиль...');
-                const profile = await API.getProfile();
-                API.setUser(profile);
-                UI.showMainScreen();
-                UI.updateUserInfo(profile);
-                console.log('✅ Профиль загружен');
-            } catch (error) {
-                console.error('❌ Ошибка загрузки профиля:', error);
-                UI.showLoginScreen();
-            }
+            // === СНАЧАЛА ВСЕГДА навешиваем обработчики ===
 
             // Login form
             const loginForm = document.getElementById('login-form');
@@ -1064,6 +1045,29 @@
                     }
                 });
             });
+
+            // === ПОСЛЕ навешивания обработчиков проверяем токен ===
+
+            const token = API.getToken();
+            console.log('Токен:', token ? 'есть' : 'нет');
+
+            if (!token) {
+                console.log('Показываем экран входа');
+                UI.showLoginScreen();
+                return;
+            }
+
+            try {
+                console.log('Загружаем профиль...');
+                const profile = await API.getProfile();
+                API.setUser(profile);
+                UI.showMainScreen();
+                UI.updateUserInfo(profile);
+                console.log('✅ Профиль загружен');
+            } catch (error) {
+                console.error('❌ Ошибка загрузки профиля:', error);
+                UI.showLoginScreen();
+            }
         });
     </script>
 </body>
