@@ -1,3 +1,68 @@
+console.log('🍯 Honey Motivation загружается...');
+
+// Инициализация приложения
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('✅ DOM загружен');
+
+    // Проверить авторизацию
+    const token = API.getToken();
+    console.log('Токен:', token ? 'есть' : 'нет');
+
+    if (!token) {
+        console.log('Показываем экран входа');
+        UI.showLoginScreen();
+        return;
+    }
+
+    try {
+        console.log('Загружаем профиль...');
+        // Загрузить профиль
+        const profile = await API.getProfile();
+        API.setUser(profile);
+        UI.showMainScreen();
+        UI.updateUserInfo(profile);
+
+        // Загрузить дашборд
+        await DashboardPage.load();
+        console.log('✅ Профиль загружен');
+    } catch (error) {
+        console.error('❌ Ошибка загрузки профиля:', error);
+        UI.showLoginScreen();
+    }
+
+    // Форма входа
+    const loginForm = document.getElementById('login-form');
+    console.log('Форма входа:', loginForm ? 'найдена' : 'НЕ НАЙДЕНА');
+
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+            console.log('🔥 Клик по кнопке Войти!');
+            e.preventDefault();
+
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+
+            console.log('Логин:', username);
+            console.log('Пароль:', password ? 'есть' : 'нет');
+
+            try {
+                console.log('Отправляем запрос на сервер...');
+                await API.login(username, password);
+                console.log('✅ Успешный вход');
+
+                const profile = await API.getProfile();
+                API.setUser(profile);
+                UI.showMainScreen();
+                UI.updateUserInfo(profile);
+                await DashboardPage.load();
+                UI.showNotification('Добро пожаловать! 🍯', 'success');
+            } catch (error) {
+                console.error('❌ Ошибка входа:', error);
+                UI.showNotification(error.message, 'error');
+            }
+        });
+    }
+
 // Главная страница (дашборд)
 const DashboardPage = {
     async load() {
