@@ -4,8 +4,548 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Honey Motivation 🍯</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/responsive.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #f4a261;
+            --primary-dark: #e76f51;
+            --secondary: #2a9d8f;
+            --accent: #e9c46a;
+            --bg-light: #fff8f0;
+            --bg-white: #ffffff;
+            --text-dark: #264653;
+            --text-light: #6c757d;
+            --border: #e0e0e0;
+            --success: #52b788;
+            --error: #e63946;
+            --header-height: 60px;
+            --bottom-nav-height: 70px;
+            --border-radius: 12px;
+            --border-radius-sm: 8px;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.15);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .screen {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        #login-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f4a261 0%, #e9c46a 100%);
+        }
+
+        .login-container {
+            background: var(--bg-white);
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo-emoji {
+            font-size: 64px;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .logo h1 {
+            color: var(--primary-dark);
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .logo p {
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .login-form input {
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: var(--border-radius-sm);
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .login-form input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .login-hint {
+            text-align: center;
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
+        .login-hint a {
+            color: var(--primary-dark);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+
+        .btn-icon:hover {
+            background: rgba(0,0,0,0.05);
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            background: var(--bg-white);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-small {
+            font-size: 28px;
+        }
+
+        .header-left h2 {
+            font-size: 18px;
+            color: var(--primary-dark);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info {
+            display: flex;
+            gap: 10px;
+        }
+
+        .stat-badge {
+            background: var(--accent);
+            color: var(--text-dark);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .content {
+            margin-top: var(--header-height);
+            margin-bottom: var(--bottom-nav-height);
+            padding: 20px;
+            min-height: calc(100vh - var(--header-height) - var(--bottom-nav-height));
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .welcome-card,
+        .level-progress-card,
+        .streak-card {
+            background: var(--bg-white);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .welcome-card h2 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            color: var(--primary-dark);
+        }
+
+        .welcome-card p {
+            color: var(--text-light);
+            font-size: 16px;
+        }
+
+        .level-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .level-emoji {
+            font-size: 48px;
+        }
+
+        .level-info h3 {
+            font-size: 20px;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .level-info p {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
+        .progress-bar {
+            height: 12px;
+            background: var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+            border-radius: 6px;
+            transition: width 0.5s ease;
+        }
+
+        .streak-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .streak-emoji {
+            font-size: 36px;
+        }
+
+        .streak-info h3 {
+            font-size: 20px;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .streak-info p {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
+        .streak-bonus {
+            padding-top: 10px;
+            border-top: 1px solid var(--border);
+            font-size: 14px;
+            color: var(--secondary);
+            font-weight: 600;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            background: var(--bg-white);
+            border: 2px solid var(--border);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .action-btn:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .action-icon {
+            font-size: 32px;
+        }
+
+        .action-btn span:last-child {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .page-header {
+            margin-bottom: 20px;
+        }
+
+        .page-header h2 {
+            font-size: 28px;
+            color: var(--primary-dark);
+            margin-bottom: 15px;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+
+        .tab-btn {
+            background: var(--bg-white);
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .tasks-list,
+        .shop-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .task-card,
+        .shop-card {
+            background: var(--bg-white);
+            border-radius: var(--border-radius);
+            padding: 16px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s;
+        }
+
+        .task-card:hover,
+        .shop-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .task-icon,
+        .shop-icon {
+            font-size: 32px;
+            flex-shrink: 0;
+        }
+
+        .task-info,
+        .shop-info {
+            flex-grow: 1;
+        }
+
+        .task-title,
+        .shop-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .task-meta,
+        .shop-meta {
+            font-size: 13px;
+            color: var(--text-light);
+            display: flex;
+            gap: 10px;
+        }
+
+        .task-reward,
+        .shop-cost {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+
+        .task-complete-btn,
+        .shop-buy-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            padding: 10px 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+
+        .task-complete-btn:hover,
+        .shop-buy-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .task-complete-btn:disabled,
+        .shop-buy-btn:disabled {
+            background: var(--border);
+            cursor: not-allowed;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: var(--bottom-nav-height);
+            background: var(--bg-white);
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            padding: 8px 12px;
+            transition: all 0.3s;
+            color: var(--text-light);
+        }
+
+        .nav-btn.active {
+            color: var(--primary-dark);
+        }
+
+        .nav-icon {
+            font-size: 24px;
+        }
+
+        .nav-label {
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .notifications {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .notification {
+            background: var(--bg-white);
+            border-radius: var(--border-radius-sm);
+            padding: 12px 20px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 250px;
+            animation: slideIn 0.3s;
+            border-left: 4px solid var(--primary);
+        }
+
+        .notification.success {
+            border-left-color: var(--success);
+        }
+
+        .notification.error {
+            border-left-color: var(--error);
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(100%); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+    </style>
 </head>
 <body>
     <!-- Экран входа -->
@@ -34,7 +574,6 @@
 
     <!-- Главный экран -->
     <div id="main-screen" class="screen">
-        <!-- Шапка -->
         <header class="header">
             <div class="header-left">
                 <span class="logo-small">🍯</span>
@@ -49,16 +588,13 @@
             </div>
         </header>
 
-        <!-- Контент -->
         <main class="content">
-            <!-- Дашборд -->
             <section id="dashboard" class="page active">
                 <div class="welcome-card">
                     <h2>Привет, <span id="user-name">друг</span>! 👋</h2>
                     <p id="level-description">Твоя первая сладкая капля в большом пути</p>
                 </div>
 
-                <!-- Прогресс уровня -->
                 <div class="level-progress-card">
                     <div class="level-header">
                         <span id="current-level-emoji" class="level-emoji">🍯</span>
@@ -72,7 +608,6 @@
                     </div>
                 </div>
 
-                <!-- Стрик -->
                 <div class="streak-card">
                     <div class="streak-header">
                         <span class="streak-emoji">🔥</span>
@@ -81,12 +616,8 @@
                             <p>Рекорд: <span id="longest-streak">0</span> дней</p>
                         </div>
                     </div>
-                    <div id="streak-bonus" class="streak-bonus hidden">
-                        <span>Множитель: ×<span id="streak-multiplier">1.0</span></span>
-                    </div>
                 </div>
 
-                <!-- Быстрые действия -->
                 <div class="quick-actions">
                     <button class="action-btn" data-page="tasks">
                         <span class="action-icon">✅</span>
@@ -96,82 +627,24 @@
                         <span class="action-icon">🏪</span>
                         <span>Магазин</span>
                     </button>
-                    <button class="action-btn" data-page="achievements">
-                        <span class="action-icon">🏆</span>
-                        <span>Достижения</span>
-                    </button>
-                    <button class="action-btn" data-page="history">
-                        <span class="action-icon">📊</span>
-                        <span>История</span>
-                    </button>
                 </div>
             </section>
 
-            <!-- Задания -->
             <section id="tasks" class="page">
                 <div class="page-header">
                     <h2>Задания ✅</h2>
-                    <div class="filter-tabs">
-                        <button class="tab-btn active" data-category="all">Все</button>
-                        <button class="tab-btn" data-category="daily">Ежедневные</button>
-                        <button class="tab-btn" data-category="weekly">Еженедельные</button>
-                        <button class="tab-btn" data-category="one_time">Разовые</button>
-                    </div>
                 </div>
                 <div id="tasks-list" class="tasks-list"></div>
             </section>
 
-            <!-- Магазин -->
             <section id="shop" class="page">
                 <div class="page-header">
                     <h2>Магазин 🏪</h2>
-                    <div class="filter-tabs">
-                        <button class="tab-btn active" data-category="all">Все</button>
-                        <button class="tab-btn" data-category="small">Мелкие</button>
-                        <button class="tab-btn" data-category="medium">Средние</button>
-                        <button class="tab-btn" data-category="large">Большие</button>
-                        <button class="tab-btn" data-category="epic">Эпичные</button>
-                        <button class="tab-btn" data-category="special">Специальные</button>
-                    </div>
                 </div>
                 <div id="shop-list" class="shop-list"></div>
             </section>
-
-            <!-- Достижения -->
-            <section id="achievements" class="page">
-                <div class="page-header">
-                    <h2>Достижения 🏆</h2>
-                </div>
-                <div id="achievements-list" class="achievements-list"></div>
-            </section>
-
-            <!-- История -->
-            <section id="history" class="page">
-                <div class="page-header">
-                    <h2>История 📊</h2>
-                </div>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <span class="stat-icon">⭐</span>
-                        <span class="stat-value" id="total-stars-earned">0</span>
-                        <span class="stat-label">Заработано звёзд</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-icon">✅</span>
-                        <span class="stat-value" id="total-tasks-completed">0</span>
-                        <span class="stat-label">Выполнено заданий</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-icon">🛍️</span>
-                        <span class="stat-value" id="total-purchases">0</span>
-                        <span class="stat-label">Покупок</span>
-                    </div>
-                </div>
-                <div id="history-list" class="history-list"></div>
-            </section>
         </main>
 
-        <!-- Нижняя навигация -->
         <nav class="bottom-nav">
             <button class="nav-btn active" data-page="dashboard">
                 <span class="nav-icon">🏠</span>
@@ -185,755 +658,413 @@
                 <span class="nav-icon">🏪</span>
                 <span class="nav-label">Магазин</span>
             </button>
-            <button class="nav-btn" data-page="achievements">
-                <span class="nav-icon">🏆</span>
-                <span class="nav-label">Достижения</span>
-            </button>
-            <button class="nav-btn" data-page="history">
-                <span class="nav-icon">📊</span>
-                <span class="nav-label">История</span>
-            </button>
         </nav>
     </div>
 
-    <!-- Модальные окна -->
-    <div id="modal-overlay" class="modal-overlay hidden">
-        <div class="modal">
-            <button class="modal-close">&times;</button>
-            <div id="modal-content"></div>
-        </div>
-    </div>
-
-    <!-- Уведомления -->
     <div id="notifications" class="notifications"></div>
 
-    <!-- Конфетти -->
-    <canvas id="confetti-canvas"></canvas>
-
-<!--    <script src="js/api.js"></script>-->
     <script>
-        // Конфигурация API
-const API_CONFIG = {
-    BASE_URL: 'http://138.16.177.245:8000',
-    TOKEN_KEY: 'honey_token',
-    USER_KEY: 'honey_user'
-};
-
-// Класс для работы с API
-class API {
-    static getToken() {
-        return localStorage.getItem(API_CONFIG.TOKEN_KEY);
-    }
-
-    static setToken(token) {
-        localStorage.setItem(API_CONFIG.TOKEN_KEY, token);
-    }
-
-    static getUser() {
-        const user = localStorage.getItem(API_CONFIG.USER_KEY);
-        return user ? JSON.parse(user) : null;
-    }
-
-    static setUser(user) {
-        localStorage.setItem(API_CONFIG.USER_KEY, JSON.stringify(user));
-    }
-
-    static clearAuth() {
-        localStorage.removeItem(API_CONFIG.TOKEN_KEY);
-        localStorage.removeItem(API_CONFIG.USER_KEY);
-    }
-
-    static async request(endpoint, options = {}) {
-        const token = this.getToken();
-        const headers = {
-            'Content-Type': 'application/json',
-            ...options.headers
+        // API Configuration
+        const API_CONFIG = {
+            BASE_URL: 'http://138.16.177.245:8000',
+            TOKEN_KEY: 'honey_token',
+            USER_KEY: 'honey_user'
         };
 
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-        }
-
-        try {
-            const response = await fetch(`${API_CONFIG.BASE_URL}${endpoint}`, {
-                ...options,
-                headers
-            });
-
-            if (response.status === 401) {
-                this.clearAuth();
-                window.location.reload();
-                throw new Error('Сессия истекла');
+        // API Class
+        class API {
+            static getToken() {
+                return localStorage.getItem(API_CONFIG.TOKEN_KEY);
             }
 
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.detail || 'Ошибка запроса');
+            static setToken(token) {
+                localStorage.setItem(API_CONFIG.TOKEN_KEY, token);
             }
 
-            return await response.json();
-        } catch (error) {
-            console.error('API Error:', error);
-            throw error;
-        }
-    }
-
-    // Auth
-    static async login(username, password) {
-        const data = await this.request('/auth/login', {
-            method: 'POST',
-            body: JSON.stringify({ username, password })
-        });
-        this.setToken(data.access_token);
-        return data;
-    }
-
-    static async register(username, password, role = 'user') {
-        const data = await this.request('/auth/register', {
-            method: 'POST',
-            body: JSON.stringify({ username, password, role })
-        });
-        this.setToken(data.access_token);
-        return data;
-    }
-
-    // User
-    static async getProfile() {
-        return await this.request('/user/profile');
-    }
-
-    static async updateProfile(userData) {
-        return await this.request('/user/profile', {
-            method: 'PUT',
-            body: JSON.stringify(userData)
-        });
-    }
-
-    static async getLevelInfo() {
-        return await this.request('/user/level');
-    }
-
-    static async getLevelProgress() {
-        return await this.request('/user/level/progress');
-    }
-
-    static async getStreak() {
-        return await this.request('/user/streak');
-    }
-
-    static async getDailyStats(days = 7) {
-        return await this.request(`/user/stats/daily?days=${days}`);
-    }
-
-    // Tasks
-    static async getTasks(category = null) {
-        const url = category && category !== 'all'
-            ? `/tasks/?category=${category}`
-            : '/tasks/';
-        return await this.request(url);
-    }
-
-    static async completeTask(taskId) {
-        return await this.request(`/tasks/${taskId}/complete`, {
-            method: 'POST'
-        });
-    }
-
-    static async getCompletions(days = 7) {
-        return await this.request(`/tasks/completions?days=${days}`);
-    }
-
-    // Shop
-    static async getShopItems(category = null) {
-        const url = category && category !== 'all'
-            ? `/shop/?category=${category}`
-            : '/shop/';
-        return await this.request(url);
-    }
-
-    static async buyItem(shopItemId) {
-        return await this.request('/shop/buy', {
-            method: 'POST',
-            body: JSON.stringify({ shop_item_id: shopItemId })
-        });
-    }
-
-    static async getPurchases() {
-        return await this.request('/shop/purchases');
-    }
-}
-    </script>
-
-<!--    <script src="js/ui.js"></script>-->
-    <script>
-        // UI утилиты
-const UI = {
-    // Показать уведомление
-    showNotification(message, type = 'info') {
-        const container = document.getElementById('notifications');
-        const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
-        notification.innerHTML = `
-            <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
-            <span>${message}</span>
-        `;
-        container.appendChild(notification);
-
-        setTimeout(() => {
-            notification.style.animation = 'slideIn 0.3s reverse';
-            setTimeout(() => notification.remove(), 300);
-        }, 3000);
-    },
-
-    // Показать модальное окно
-    showModal(content) {
-        const overlay = document.getElementById('modal-overlay');
-        const modalContent = document.getElementById('modal-content');
-        modalContent.innerHTML = content;
-        overlay.classList.remove('hidden');
-    },
-
-    // Скрыть модальное окно
-    hideModal() {
-        const overlay = document.getElementById('modal-overlay');
-        overlay.classList.add('hidden');
-    },
-
-    // Переключить страницу
-    switchPage(pageId) {
-        // Убрать active у всех страниц
-        document.querySelectorAll('.page').forEach(page => {
-            page.classList.remove('active');
-        });
-
-        // Убрать active у всех кнопок навигации
-        document.querySelectorAll('.nav-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-
-        // Активировать нужную страницу
-        const page = document.getElementById(pageId);
-        if (page) {
-            page.classList.add('active');
-        }
-
-        // Активировать кнопку навигации
-        const navBtn = document.querySelector(`.nav-btn[data-page="${pageId}"]`);
-        if (navBtn) {
-            navBtn.classList.add('active');
-        }
-
-        // Загрузить данные для страницы
-        if (pageId === 'tasks') {
-            TasksPage.load();
-        } else if (pageId === 'shop') {
-            ShopPage.load();
-        } else if (pageId === 'history') {
-            HistoryPage.load();
-        }
-    },
-
-    // Показать экран входа
-    showLoginScreen() {
-        document.getElementById('login-screen').classList.add('active');
-        document.getElementById('main-screen').classList.remove('active');
-    },
-
-    // Показать главный экран
-    showMainScreen() {
-        document.getElementById('login-screen').classList.remove('active');
-        document.getElementById('main-screen').classList.add('active');
-    },
-
-    // Обновить информацию о пользователе в шапке
-    updateUserInfo(user) {
-        document.getElementById('user-stars').textContent = `⭐ ${Math.floor(user.stars)}`;
-        document.getElementById('user-level').textContent = `Ур. ${user.level}`;
-        document.getElementById('user-name').textContent = user.display_name || user.username;
-    },
-
-    // Форматировать дату
-    formatDate(dateString) {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diff = now - date;
-
-        const minutes = Math.floor(diff / 60000);
-        const hours = Math.floor(diff / 3600000);
-        const days = Math.floor(diff / 86400000);
-
-        if (minutes < 1) return 'только что';
-        if (minutes < 60) return `${minutes} мин. назад`;
-        if (hours < 24) return `${hours} ч. назад`;
-        if (days < 7) return `${days} дн. назад`;
-
-        return date.toLocaleDateString('ru-RU');
-    }
-};
-
-// Инициализация UI
-document.addEventListener('DOMContentLoaded', () => {
-    // Закрытие модального окна
-    document.querySelector('.modal-close')?.addEventListener('click', () => {
-        UI.hideModal();
-    });
-
-    document.getElementById('modal-overlay')?.addEventListener('click', (e) => {
-        if (e.target.id === 'modal-overlay') {
-            UI.hideModal();
-        }
-    });
-
-    // Навигация
-    document.querySelectorAll('.nav-btn, .action-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const page = btn.dataset.page;
-            if (page) {
-                UI.switchPage(page);
+            static getUser() {
+                const user = localStorage.getItem(API_CONFIG.USER_KEY);
+                return user ? JSON.parse(user) : null;
             }
-        });
-    });
-});
-    </script>
 
-<!--    <script src="js/tasks.js"></script>-->
-    <script>
+            static setUser(user) {
+                localStorage.setItem(API_CONFIG.USER_KEY, JSON.stringify(user));
+            }
+
+            static clearAuth() {
+                localStorage.removeItem(API_CONFIG.TOKEN_KEY);
+                localStorage.removeItem(API_CONFIG.USER_KEY);
+            }
+
+            static async request(endpoint, options = {}) {
+                const token = this.getToken();
+                const headers = {
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                };
+
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+
+                try {
+                    const response = await fetch(`${API_CONFIG.BASE_URL}${endpoint}`, {
+                        ...options,
+                        headers
+                    });
+
+                    if (response.status === 401) {
+                        this.clearAuth();
+                        window.location.reload();
+                        throw new Error('Сессия истекла');
+                    }
+
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.detail || 'Ошибка запроса');
+                    }
+
+                    return await response.json();
+                } catch (error) {
+                    console.error('API Error:', error);
+                    throw error;
+                }
+            }
+
+            static async login(username, password) {
+                const data = await this.request('/auth/login', {
+                    method: 'POST',
+                    body: JSON.stringify({ username, password })
+                });
+                this.setToken(data.access_token);
+                return data;
+            }
+
+            static async register(username, password, role = 'user') {
+                const data = await this.request('/auth/register', {
+                    method: 'POST',
+                    body: JSON.stringify({ username, password, role })
+                });
+                this.setToken(data.access_token);
+                return data;
+            }
+
+            static async getProfile() {
+                return await this.request('/user/profile');
+            }
+
+            static async getTasks(category = null) {
+                const url = category && category !== 'all'
+                    ? `/tasks/?category=${category}`
+                    : '/tasks/';
+                return await this.request(url);
+            }
+
+            static async completeTask(taskId) {
+                return await this.request(`/tasks/${taskId}/complete`, {
+                    method: 'POST'
+                });
+            }
+
+            static async getShopItems(category = null) {
+                const url = category && category !== 'all'
+                    ? `/shop/?category=${category}`
+                    : '/shop/';
+                return await this.request(url);
+            }
+
+            static async buyItem(shopItemId) {
+                return await this.request('/shop/buy', {
+                    method: 'POST',
+                    body: JSON.stringify({ shop_item_id: shopItemId })
+                });
+            }
+        }
+
+        // UI Utilities
+        const UI = {
+            showNotification(message, type = 'info') {
+                const container = document.getElementById('notifications');
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.innerHTML = `
+                    <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
+                    <span>${message}</span>
+                `;
+                container.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.style.animation = 'slideIn 0.3s reverse';
+                    setTimeout(() => notification.remove(), 300);
+                }, 3000);
+            },
+
+            switchPage(pageId) {
+                document.querySelectorAll('.page').forEach(page => {
+                    page.classList.remove('active');
+                });
+
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+
+                const page = document.getElementById(pageId);
+                if (page) {
+                    page.classList.add('active');
+                }
+
+                const navBtn = document.querySelector(`.nav-btn[data-page="${pageId}"]`);
+                if (navBtn) {
+                    navBtn.classList.add('active');
+                }
+
+                if (pageId === 'tasks') {
+                    TasksPage.load();
+                } else if (pageId === 'shop') {
+                    ShopPage.load();
+                }
+            },
+
+            showLoginScreen() {
+                document.getElementById('login-screen').classList.add('active');
+                document.getElementById('main-screen').classList.remove('active');
+            },
+
+            showMainScreen() {
+                document.getElementById('login-screen').classList.remove('active');
+                document.getElementById('main-screen').classList.add('active');
+            },
+
+            updateUserInfo(user) {
+                document.getElementById('user-stars').textContent = `⭐ ${Math.floor(user.stars)}`;
+                document.getElementById('user-level').textContent = `Ур. ${user.level}`;
+                document.getElementById('user-name').textContent = user.display_name || user.username;
+            }
+        };
+
+        // Tasks Page
         const TasksPage = {
-    currentCategory: 'all',
+            async load() {
+                try {
+                    const tasks = await API.getTasks();
+                    this.render(tasks);
+                } catch (error) {
+                    UI.showNotification(error.message, 'error');
+                }
+            },
 
-    async load() {
-        try {
-            const tasks = await API.getTasks(this.currentCategory);
-            this.render(tasks);
-        } catch (error) {
-            UI.showNotification(error.message, 'error');
-        }
-    },
+            render(tasks) {
+                const container = document.getElementById('tasks-list');
 
-    render(tasks) {
-        const container = document.getElementById('tasks-list');
+                if (tasks.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 40px;">Нет заданий</p>';
+                    return;
+                }
 
-        if (tasks.length === 0) {
-            container.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 40px;">Нет заданий в этой категории</p>';
-            return;
-        }
-
-        container.innerHTML = tasks.map(task => `
-            <div class="task-card">
-                <span class="task-icon">${this.getCategoryIcon(task.category)}</span>
-                <div class="task-info">
-                    <div class="task-title">${task.title}</div>
-                    <div class="task-meta">
-                        <span class="task-reward">⭐ ${task.stars_reward}</span>
-                        <span>•</span>
-                        <span>✨ ${task.xp_reward} XP</span>
-                    </div>
-                </div>
-                <button class="task-complete-btn" onclick="TasksPage.complete(${task.id})">
-                    Выполнено
-                </button>
-            </div>
-        `).join('');
-    },
-
-    getCategoryIcon(category) {
-        const icons = {
-            'daily': '📅',
-            'weekly': '🗓️',
-            'one_time': '🎯',
-            'special': '✨'
-        };
-        return icons[category] || '✅';
-    },
-
-    async complete(taskId) {
-        try {
-            const result = await API.completeTask(taskId);
-            UI.showNotification(`+${result.stars_earned.toFixed(1)} ⭐ и +${result.xp_earned.toFixed(1)} XP`, 'success');
-
-            // Обновить профиль
-            const profile = await API.getProfile();
-            API.setUser(profile);
-            UI.updateUserInfo(profile);
-
-            // Перезагрузить задания
-            await this.load();
-
-            // Обновить прогресс уровня
-            await DashboardPage.load();
-        } catch (error) {
-            UI.showNotification(error.message, 'error');
-        }
-    }
-};
-
-// Фильтры заданий
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('#tasks .tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('#tasks .tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            TasksPage.currentCategory = btn.dataset.category;
-            TasksPage.load();
-        });
-    });
-});
-    </script>
-
-<!--    <script src="js/shop.js"></script>-->
-    <script>
-        const ShopPage = {
-    currentCategory: 'all',
-
-    async load() {
-        try {
-            const items = await API.getShopItems(this.currentCategory);
-            this.render(items);
-        } catch (error) {
-            UI.showNotification(error.message, 'error');
-        }
-    },
-
-    render(items) {
-        const container = document.getElementById('shop-list');
-        const user = API.getUser();
-
-        if (items.length === 0) {
-            container.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 40px;">Нет товаров в этой категории</p>';
-            return;
-        }
-
-        container.innerHTML = items.map(item => {
-            const canAfford = user.stars >= item.stars_cost;
-            return `
-                <div class="shop-card">
-                    <span class="shop-icon">${item.emoji || '🎁'}</span>
-                    <div class="shop-info">
-                        <div class="shop-title">${item.title}</div>
-                        <div class="shop-meta">
-                            <span class="shop-cost">⭐ ${item.stars_cost}</span>
-                            ${item.description ? `<span>• ${item.description}</span>` : ''}
+                container.innerHTML = tasks.map(task => `
+                    <div class="task-card">
+                        <span class="task-icon">✅</span>
+                        <div class="task-info">
+                            <div class="task-title">${task.title}</div>
+                            <div class="task-meta">
+                                <span class="task-reward">⭐ ${task.stars_reward}</span>
+                                <span>•</span>
+                                <span>✨ ${task.xp_reward} XP</span>
+                            </div>
                         </div>
+                        <button class="task-complete-btn" onclick="TasksPage.complete(${task.id})">
+                            Выполнено
+                        </button>
                     </div>
-                    <button class="shop-buy-btn"
-                            onclick="ShopPage.buy(${item.id})"
-                            ${!canAfford ? 'disabled' : ''}>
-                        ${canAfford ? 'Купить' : 'Мало ⭐'}
-                    </button>
-                </div>
-            `;
-        }).join('');
-    },
+                `).join('');
+            },
 
-    async buy(itemId) {
-        try {
-            const result = await API.buyItem(itemId);
-            UI.showNotification('Покупка совершена! 🎉', 'success');
+            async complete(taskId) {
+                try {
+                    const result = await API.completeTask(taskId);
+                    UI.showNotification(`+${result.stars_earned.toFixed(1)} ⭐ и +${result.xp_earned.toFixed(1)} XP`, 'success');
 
-            // Обновить профиль
-            const profile = await API.getProfile();
-            API.setUser(profile);
-            UI.updateUserInfo(profile);
+                    const profile = await API.getProfile();
+                    API.setUser(profile);
+                    UI.updateUserInfo(profile);
 
-            // Перезагрузить магазин
-            await this.load();
-        } catch (error) {
-            UI.showNotification(error.message, 'error');
-        }
-    }
-};
+                    await this.load();
+                } catch (error) {
+                    UI.showNotification(error.message, 'error');
+                }
+            }
+        };
 
-// Фильтры магазина
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('#shop .tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('#shop .tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            ShopPage.currentCategory = btn.dataset.category;
-            ShopPage.load();
-        });
-    });
-});
-    </script>
+        // Shop Page
+        const ShopPage = {
+            async load() {
+                try {
+                    const items = await API.getShopItems();
+                    this.render(items);
+                } catch (error) {
+                    UI.showNotification(error.message, 'error');
+                }
+            },
 
-<!--    <script src="js/levels.js"></script>-->
-    <script>
-        const LevelsPage = {
-    async load() {
-        try {
-            const progress = await API.getLevelProgress();
-            this.render(progress);
-        } catch (error) {
-            console.error('Error loading levels:', error);
-        }
-    },
+            render(items) {
+                const container = document.getElementById('shop-list');
+                const user = API.getUser();
 
-    render(progress) {
-        const { current_level, next_level, xp_to_next, xp_in_current_level, progress_percent, is_max_level } = progress;
+                if (items.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 40px;">Магазин пуст</p>';
+                    return;
+                }
 
-        document.getElementById('current-level-emoji').textContent = current_level.emoji;
-        document.getElementById('current-level-name').textContent = current_level.name;
-        document.getElementById('level-description').textContent = current_level.description;
+                container.innerHTML = items.map(item => {
+                    const canAfford = user.stars >= item.stars_cost;
+                    return `
+                        <div class="shop-card">
+                            <span class="shop-icon">${item.emoji || '🎁'}</span>
+                            <div class="shop-info">
+                                <div class="shop-title">${item.title}</div>
+                                <div class="shop-meta">
+                                    <span class="shop-cost">⭐ ${item.stars_cost}</span>
+                                </div>
+                            </div>
+                            <button class="shop-buy-btn"
+                                    onclick="ShopPage.buy(${item.id})"
+                                    ${!canAfford ? 'disabled' : ''}>
+                                ${canAfford ? 'Купить' : 'Мало ⭐'}
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+            },
 
-        if (is_max_level) {
-            document.getElementById('level-progress-text').textContent = 'Максимальный уровень!';
-            document.getElementById('level-progress-bar').style.width = '100%';
-        } else {
-            document.getElementById('level-progress-text').textContent =
-                `${Math.floor(xp_in_current_level)} / ${xp_to_next} XP`;
-            document.getElementById('level-progress-bar').style.width = `${progress_percent}%`;
-        }
-    }
-};
-    </script>
+            async buy(itemId) {
+                try {
+                    await API.buyItem(itemId);
+                    UI.showNotification('Покупка совершена! 🎉', 'success');
 
-<!--    <script src="js/app.js"></script>-->
-    <script>
-        console.log('🍯 Honey Motivation загружается...');
+                    const profile = await API.getProfile();
+                    API.setUser(profile);
+                    UI.updateUserInfo(profile);
 
-// Инициализация приложения
-document.addEventListener('DOMContentLoaded', async () => {
-    console.log('✅ DOM загружен');
+                    await this.load();
+                } catch (error) {
+                    UI.showNotification(error.message, 'error');
+                }
+            }
+        };
 
-    // Проверить авторизацию
-    const token = API.getToken();
-    console.log('Токен:', token ? 'есть' : 'нет');
+        // App Initialization
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🍯 Honey Motivation загружается...');
 
-    if (!token) {
-        console.log('Показываем экран входа');
-        UI.showLoginScreen();
-        return;
-    }
+            const token = API.getToken();
+            console.log('Токен:', token ? 'есть' : 'нет');
 
-    try {
-        console.log('Загружаем профиль...');
-        // Загрузить профиль
-        const profile = await API.getProfile();
-        API.setUser(profile);
-        UI.showMainScreen();
-        UI.updateUserInfo(profile);
-
-        // Загрузить дашборд
-        await DashboardPage.load();
-        console.log('✅ Профиль загружен');
-    } catch (error) {
-        console.error('❌ Ошибка загрузки профиля:', error);
-        UI.showLoginScreen();
-    }
-
-    // Форма входа
-    const loginForm = document.getElementById('login-form');
-    console.log('Форма входа:', loginForm ? 'найдена' : 'НЕ НАЙДЕНА');
-
-    if (loginForm) {
-        loginForm.addEventListener('submit', async (e) => {
-            console.log('🔥 Клик по кнопке Войти!');
-            e.preventDefault();
-
-            const username = document.getElementById('login-username').value;
-            const password = document.getElementById('login-password').value;
-
-            console.log('Логин:', username);
-            console.log('Пароль:', password ? 'есть' : 'нет');
+            if (!token) {
+                console.log('Показываем экран входа');
+                UI.showLoginScreen();
+                return;
+            }
 
             try {
-                console.log('Отправляем запрос на сервер...');
-                await API.login(username, password);
-                console.log('✅ Успешный вход');
-
+                console.log('Загружаем профиль...');
                 const profile = await API.getProfile();
                 API.setUser(profile);
                 UI.showMainScreen();
                 UI.updateUserInfo(profile);
-                await DashboardPage.load();
-                UI.showNotification('Добро пожаловать! 🍯', 'success');
+                console.log('✅ Профиль загружен');
             } catch (error) {
-                console.error('❌ Ошибка входа:', error);
-                UI.showNotification(error.message, 'error');
+                console.error('❌ Ошибка загрузки профиля:', error);
+                UI.showLoginScreen();
             }
-        });
-    }
 
-// Главная страница (дашборд)
-const DashboardPage = {
-    async load() {
-        try {
-            // Загрузить профиль
-            const profile = await API.getProfile();
-            API.setUser(profile);
-            UI.updateUserInfo(profile);
+            // Login form
+            const loginForm = document.getElementById('login-form');
+            console.log('Форма входа:', loginForm ? 'найдена' : 'НЕ НАЙДЕНА');
 
-            // Загрузить прогресс уровня
-            await LevelsPage.load();
+            if (loginForm) {
+                loginForm.addEventListener('submit', async (e) => {
+                    console.log('🔥 Клик по кнопке Войти!');
+                    e.preventDefault();
 
-            // Загрузить стрик
-            const streak = await API.getStreak();
-            document.getElementById('current-streak').textContent = streak.current_streak;
-            document.getElementById('longest-streak').textContent = streak.longest_streak;
+                    const username = document.getElementById('login-username').value;
+                    const password = document.getElementById('login-password').value;
 
-            // Показать бонус стрика, если есть
-            if (streak.current_streak >= 3) {
-                document.getElementById('streak-bonus').classList.remove('hidden');
-                const multipliers = {
-                    3: 1.1, 7: 1.2, 14: 1.3, 30: 1.5, 60: 1.7, 100: 2.0
-                };
-                let multiplier = 1.0;
-                for (const [days, mult] of Object.entries(multipliers)) {
-                    if (streak.current_streak >= parseInt(days)) {
-                        multiplier = mult;
+                    console.log('Логин:', username);
+
+                    try {
+                        console.log('Отправляем запрос на сервер...');
+                        await API.login(username, password);
+                        console.log('✅ Успешный вход');
+
+                        const profile = await API.getProfile();
+                        API.setUser(profile);
+                        UI.showMainScreen();
+                        UI.updateUserInfo(profile);
+                        UI.showNotification('Добро пожаловать! 🍯', 'success');
+                    } catch (error) {
+                        console.error('❌ Ошибка входа:', error);
+                        UI.showNotification(error.message, 'error');
                     }
-                }
-                document.getElementById('streak-multiplier').textContent = multiplier.toFixed(1);
+                });
             }
-        } catch (error) {
-            UI.showNotification(error.message, 'error');
-        }
-    }
-};
 
-// Страница истории
-const HistoryPage = {
-    async load() {
-        try {
-            const completions = await API.getCompletions(30);
-            const purchases = await API.getPurchases();
-            const profile = API.getUser();
+            // Register form
+            const registerForm = document.getElementById('register-form');
+            if (registerForm) {
+                registerForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const username = document.getElementById('register-username').value;
+                    const password = document.getElementById('register-password').value;
+                    const confirmPassword = document.getElementById('register-password-confirm').value;
 
-            // Статистика
-            document.getElementById('total-stars-earned').textContent = Math.floor(profile.xp);
-            document.getElementById('total-tasks-completed').textContent = completions.length;
-            document.getElementById('total-purchases').textContent = purchases.length;
+                    if (password !== confirmPassword) {
+                        UI.showNotification('Пароли не совпадают', 'error');
+                        return;
+                    }
 
-            // История
-            const history = [
-                ...completions.map(c => ({
-                    type: 'task',
-                    title: `Задание выполнено`,
-                    value: `+${c.stars_earned.toFixed(1)} ⭐`,
-                    date: c.completed_at
-                })),
-                ...purchases.map(p => ({
-                    type: 'purchase',
-                    title: `Покупка`,
-                    value: `-${p.stars_spent.toFixed(1)} ⭐`,
-                    date: p.purchased_at
-                }))
-            ].sort((a, b) => new Date(b.date) - new Date(a.date));
+                    try {
+                        await API.register(username, password);
+                        const profile = await API.getProfile();
+                        API.setUser(profile);
+                        UI.showMainScreen();
+                        UI.updateUserInfo(profile);
+                        UI.showNotification('Регистрация успешна! 🎉', 'success');
+                    } catch (error) {
+                        UI.showNotification(error.message, 'error');
+                    }
+                });
+            }
 
-            this.render(history);
-        } catch (error) {
-            UI.showNotification(error.message, 'error');
-        }
-    },
+            // Toggle forms
+            document.getElementById('show-register').addEventListener('click', (e) => {
+                e.preventDefault();
+                document.getElementById('login-form').classList.add('hidden');
+                document.getElementById('register-form').classList.remove('hidden');
+            });
 
-    render(history) {
-        const container = document.getElementById('history-list');
+            document.getElementById('show-login').addEventListener('click', (e) => {
+                e.preventDefault();
+                document.getElementById('register-form').classList.add('hidden');
+                document.getElementById('login-form').classList.remove('hidden');
+            });
 
-        if (history.length === 0) {
-            container.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 40px;">История пуста</p>';
-            return;
-        }
+            // Logout
+            document.getElementById('logout-btn').addEventListener('click', () => {
+                if (confirm('Выйти из аккаунта?')) {
+                    API.clearAuth();
+                    UI.showLoginScreen();
+                }
+            });
 
-        container.innerHTML = history.slice(0, 50).map(item => `
-            <div class="history-item">
-                <div class="history-item-info">
-                    <div class="history-item-title">${item.title}</div>
-                    <div class="history-item-date">${UI.formatDate(item.date)}</div>
-                </div>
-                <div class="history-item-value">${item.value}</div>
-            </div>
-        `).join('');
-    }
-};
-
-// Инициализация приложения
-document.addEventListener('DOMContentLoaded', async () => {
-    // Проверить авторизацию
-    const token = API.getToken();
-    if (!token) {
-        UI.showLoginScreen();
-        return;
-    }
-
-    try {
-        // Загрузить профиль
-        const profile = await API.getProfile();
-        API.setUser(profile);
-        UI.showMainScreen();
-        UI.updateUserInfo(profile);
-
-        // Загрузить дашборд
-        await DashboardPage.load();
-    } catch (error) {
-        UI.showLoginScreen();
-    }
-
-    // Форма входа
-    document.getElementById('login-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const username = document.getElementById('login-username').value;
-        const password = document.getElementById('login-password').value;
-
-        try {
-            await API.login(username, password);
-            const profile = await API.getProfile();
-            API.setUser(profile);
-            UI.showMainScreen();
-            UI.updateUserInfo(profile);
-            await DashboardPage.load();
-            UI.showNotification('Добро пожаловать! 🍯', 'success');
-        } catch (error) {
-            UI.showNotification(error.message, 'error');
-        }
-    });
-
-    // Форма регистрации
-    document.getElementById('register-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const username = document.getElementById('register-username').value;
-        const password = document.getElementById('register-password').value;
-        const confirmPassword = document.getElementById('register-password-confirm').value;
-
-        if (password !== confirmPassword) {
-            UI.showNotification('Пароли не совпадают', 'error');
-            return;
-        }
-
-        try {
-            await API.register(username, password);
-            const profile = await API.getProfile();
-            API.setUser(profile);
-            UI.showMainScreen();
-            UI.updateUserInfo(profile);
-            await DashboardPage.load();
-            UI.showNotification('Регистрация успешна! 🎉', 'success');
-        } catch (error) {
-            UI.showNotification(error.message, 'error');
-        }
-    });
-
-    // Переключение форм
-    document.getElementById('show-register').addEventListener('click', (e) => {
-        e.preventDefault();
-        document.getElementById('login-form').classList.add('hidden');
-        document.getElementById('register-form').classList.remove('hidden');
-    });
-
-    document.getElementById('show-login').addEventListener('click', (e) => {
-        e.preventDefault();
-        document.getElementById('register-form').classList.add('hidden');
-        document.getElementById('login-form').classList.remove('hidden');
-    });
-
-    // Выход
-    document.getElementById('logout-btn').addEventListener('click', () => {
-        if (confirm('Выйти из аккаунта?')) {
-            API.clearAuth();
-            UI.showLoginScreen();
-        }
-    });
-});
+            // Navigation
+            document.querySelectorAll('.nav-btn, .action-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const page = btn.dataset.page;
+                    if (page) {
+                        UI.switchPage(page);
+                    }
+                });
+            });
+        });
     </script>
-
 </body>
 </html>
