@@ -1081,17 +1081,14 @@
                 console.error('❌ Ошибка загрузки профиля:', error);
                 UI.showLoginScreen();
             }
-        });
 
             // === ПОСЛЕ навешивания обработчиков проверяем токен ===
-
-            const token = API.getToken();
             console.log('Токен:', token ? 'есть' : 'нет');
 
             if (!token) {
                 console.log('Показываем экран входа');
                 UI.showLoginScreen();
-            }
+            };
         });
     </script>
 </body>
