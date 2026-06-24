@@ -210,11 +210,730 @@
     <!-- Конфетти -->
     <canvas id="confetti-canvas"></canvas>
 
-    <script src="js/api.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/tasks.js"></script>
-    <script src="js/shop.js"></script>
-    <script src="js/levels.js"></script>
-    <script src="js/app.js"></script>
+<!--    <script src="js/api.js"></script>-->
+    <script>
+        // Конфигурация API
+const API_CONFIG = {
+    BASE_URL: 'http://138.16.177.245:8000',
+    TOKEN_KEY: 'honey_token',
+    USER_KEY: 'honey_user'
+};
+
+// Класс для работы с API
+class API {
+    static getToken() {
+        return localStorage.getItem(API_CONFIG.TOKEN_KEY);
+    }
+
+    static setToken(token) {
+        localStorage.setItem(API_CONFIG.TOKEN_KEY, token);
+    }
+
+    static getUser() {
+        const user = localStorage.getItem(API_CONFIG.USER_KEY);
+        return user ? JSON.parse(user) : null;
+    }
+
+    static setUser(user) {
+        localStorage.setItem(API_CONFIG.USER_KEY, JSON.stringify(user));
+    }
+
+    static clearAuth() {
+        localStorage.removeItem(API_CONFIG.TOKEN_KEY);
+        localStorage.removeItem(API_CONFIG.USER_KEY);
+    }
+
+    static async request(endpoint, options = {}) {
+        const token = this.getToken();
+        const headers = {
+            'Content-Type': 'application/json',
+            ...options.headers
+        };
+
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        try {
+            const response = await fetch(`${API_CONFIG.BASE_URL}${endpoint}`, {
+                ...options,
+                headers
+            });
+
+            if (response.status === 401) {
+                this.clearAuth();
+                window.location.reload();
+                throw new Error('Сессия истекла');
+            }
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || 'Ошибка запроса');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('API Error:', error);
+            throw error;
+        }
+    }
+
+    // Auth
+    static async login(username, password) {
+        const data = await this.request('/auth/login', {
+            method: 'POST',
+            body: JSON.stringify({ username, password })
+        });
+        this.setToken(data.access_token);
+        return data;
+    }
+
+    static async register(username, password, role = 'user') {
+        const data = await this.request('/auth/register', {
+            method: 'POST',
+            body: JSON.stringify({ username, password, role })
+        });
+        this.setToken(data.access_token);
+        return data;
+    }
+
+    // User
+    static async getProfile() {
+        return await this.request('/user/profile');
+    }
+
+    static async updateProfile(userData) {
+        return await this.request('/user/profile', {
+            method: 'PUT',
+            body: JSON.stringify(userData)
+        });
+    }
+
+    static async getLevelInfo() {
+        return await this.request('/user/level');
+    }
+
+    static async getLevelProgress() {
+        return await this.request('/user/level/progress');
+    }
+
+    static async getStreak() {
+        return await this.request('/user/streak');
+    }
+
+    static async getDailyStats(days = 7) {
+        return await this.request(`/user/stats/daily?days=${days}`);
+    }
+
+    // Tasks
+    static async getTasks(category = null) {
+        const url = category && category !== 'all'
+            ? `/tasks/?category=${category}`
+            : '/tasks/';
+        return await this.request(url);
+    }
+
+    static async completeTask(taskId) {
+        return await this.request(`/tasks/${taskId}/complete`, {
+            method: 'POST'
+        });
+    }
+
+    static async getCompletions(days = 7) {
+        return await this.request(`/tasks/completions?days=${days}`);
+    }
+
+    // Shop
+    static async getShopItems(category = null) {
+        const url = category && category !== 'all'
+            ? `/shop/?category=${category}`
+            : '/shop/';
+        return await this.request(url);
+    }
+
+    static async buyItem(shopItemId) {
+        return await this.request('/shop/buy', {
+            method: 'POST',
+            body: JSON.stringify({ shop_item_id: shopItemId })
+        });
+    }
+
+    static async getPurchases() {
+        return await this.request('/shop/purchases');
+    }
+}
+    </script>
+
+<!--    <script src="js/ui.js"></script>-->
+    <script>
+        // UI утилиты
+const UI = {
+    // Показать уведомление
+    showNotification(message, type = 'info') {
+        const container = document.getElementById('notifications');
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `
+            <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
+            <span>${message}</span>
+        `;
+        container.appendChild(notification);
+
+        setTimeout(() => {
+            notification.style.animation = 'slideIn 0.3s reverse';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    },
+
+    // Показать модальное окно
+    showModal(content) {
+        const overlay = document.getElementById('modal-overlay');
+        const modalContent = document.getElementById('modal-content');
+        modalContent.innerHTML = content;
+        overlay.classList.remove('hidden');
+    },
+
+    // Скрыть модальное окно
+    hideModal() {
+        const overlay = document.getElementById('modal-overlay');
+        overlay.classList.add('hidden');
+    },
+
+    // Переключить страницу
+    switchPage(pageId) {
+        // Убрать active у всех страниц
+        document.querySelectorAll('.page').forEach(page => {
+            page.classList.remove('active');
+        });
+
+        // Убрать active у всех кнопок навигации
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+
+        // Активировать нужную страницу
+        const page = document.getElementById(pageId);
+        if (page) {
+            page.classList.add('active');
+        }
+
+        // Активировать кнопку навигации
+        const navBtn = document.querySelector(`.nav-btn[data-page="${pageId}"]`);
+        if (navBtn) {
+            navBtn.classList.add('active');
+        }
+
+        // Загрузить данные для страницы
+        if (pageId === 'tasks') {
+            TasksPage.load();
+        } else if (pageId === 'shop') {
+            ShopPage.load();
+        } else if (pageId === 'history') {
+            HistoryPage.load();
+        }
+    },
+
+    // Показать экран входа
+    showLoginScreen() {
+        document.getElementById('login-screen').classList.add('active');
+        document.getElementById('main-screen').classList.remove('active');
+    },
+
+    // Показать главный экран
+    showMainScreen() {
+        document.getElementById('login-screen').classList.remove('active');
+        document.getElementById('main-screen').classList.add('active');
+    },
+
+    // Обновить информацию о пользователе в шапке
+    updateUserInfo(user) {
+        document.getElementById('user-stars').textContent = `⭐ ${Math.floor(user.stars)}`;
+        document.getElementById('user-level').textContent = `Ур. ${user.level}`;
+        document.getElementById('user-name').textContent = user.display_name || user.username;
+    },
+
+    // Форматировать дату
+    formatDate(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diff = now - date;
+
+        const minutes = Math.floor(diff / 60000);
+        const hours = Math.floor(diff / 3600000);
+        const days = Math.floor(diff / 86400000);
+
+        if (minutes < 1) return 'только что';
+        if (minutes < 60) return `${minutes} мин. назад`;
+        if (hours < 24) return `${hours} ч. назад`;
+        if (days < 7) return `${days} дн. назад`;
+
+        return date.toLocaleDateString('ru-RU');
+    }
+};
+
+// Инициализация UI
+document.addEventListener('DOMContentLoaded', () => {
+    // Закрытие модального окна
+    document.querySelector('.modal-close')?.addEventListener('click', () => {
+        UI.hideModal();
+    });
+
+    document.getElementById('modal-overlay')?.addEventListener('click', (e) => {
+        if (e.target.id === 'modal-overlay') {
+            UI.hideModal();
+        }
+    });
+
+    // Навигация
+    document.querySelectorAll('.nav-btn, .action-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const page = btn.dataset.page;
+            if (page) {
+                UI.switchPage(page);
+            }
+        });
+    });
+});
+    </script>
+
+<!--    <script src="js/tasks.js"></script>-->
+    <script>
+        const TasksPage = {
+    currentCategory: 'all',
+
+    async load() {
+        try {
+            const tasks = await API.getTasks(this.currentCategory);
+            this.render(tasks);
+        } catch (error) {
+            UI.showNotification(error.message, 'error');
+        }
+    },
+
+    render(tasks) {
+        const container = document.getElementById('tasks-list');
+
+        if (tasks.length === 0) {
+            container.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 40px;">Нет заданий в этой категории</p>';
+            return;
+        }
+
+        container.innerHTML = tasks.map(task => `
+            <div class="task-card">
+                <span class="task-icon">${this.getCategoryIcon(task.category)}</span>
+                <div class="task-info">
+                    <div class="task-title">${task.title}</div>
+                    <div class="task-meta">
+                        <span class="task-reward">⭐ ${task.stars_reward}</span>
+                        <span>•</span>
+                        <span>✨ ${task.xp_reward} XP</span>
+                    </div>
+                </div>
+                <button class="task-complete-btn" onclick="TasksPage.complete(${task.id})">
+                    Выполнено
+                </button>
+            </div>
+        `).join('');
+    },
+
+    getCategoryIcon(category) {
+        const icons = {
+            'daily': '📅',
+            'weekly': '🗓️',
+            'one_time': '🎯',
+            'special': '✨'
+        };
+        return icons[category] || '✅';
+    },
+
+    async complete(taskId) {
+        try {
+            const result = await API.completeTask(taskId);
+            UI.showNotification(`+${result.stars_earned.toFixed(1)} ⭐ и +${result.xp_earned.toFixed(1)} XP`, 'success');
+
+            // Обновить профиль
+            const profile = await API.getProfile();
+            API.setUser(profile);
+            UI.updateUserInfo(profile);
+
+            // Перезагрузить задания
+            await this.load();
+
+            // Обновить прогресс уровня
+            await DashboardPage.load();
+        } catch (error) {
+            UI.showNotification(error.message, 'error');
+        }
+    }
+};
+
+// Фильтры заданий
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('#tasks .tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('#tasks .tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            TasksPage.currentCategory = btn.dataset.category;
+            TasksPage.load();
+        });
+    });
+});
+    </script>
+
+<!--    <script src="js/shop.js"></script>-->
+    <script>
+        const ShopPage = {
+    currentCategory: 'all',
+
+    async load() {
+        try {
+            const items = await API.getShopItems(this.currentCategory);
+            this.render(items);
+        } catch (error) {
+            UI.showNotification(error.message, 'error');
+        }
+    },
+
+    render(items) {
+        const container = document.getElementById('shop-list');
+        const user = API.getUser();
+
+        if (items.length === 0) {
+            container.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 40px;">Нет товаров в этой категории</p>';
+            return;
+        }
+
+        container.innerHTML = items.map(item => {
+            const canAfford = user.stars >= item.stars_cost;
+            return `
+                <div class="shop-card">
+                    <span class="shop-icon">${item.emoji || '🎁'}</span>
+                    <div class="shop-info">
+                        <div class="shop-title">${item.title}</div>
+                        <div class="shop-meta">
+                            <span class="shop-cost">⭐ ${item.stars_cost}</span>
+                            ${item.description ? `<span>• ${item.description}</span>` : ''}
+                        </div>
+                    </div>
+                    <button class="shop-buy-btn"
+                            onclick="ShopPage.buy(${item.id})"
+                            ${!canAfford ? 'disabled' : ''}>
+                        ${canAfford ? 'Купить' : 'Мало ⭐'}
+                    </button>
+                </div>
+            `;
+        }).join('');
+    },
+
+    async buy(itemId) {
+        try {
+            const result = await API.buyItem(itemId);
+            UI.showNotification('Покупка совершена! 🎉', 'success');
+
+            // Обновить профиль
+            const profile = await API.getProfile();
+            API.setUser(profile);
+            UI.updateUserInfo(profile);
+
+            // Перезагрузить магазин
+            await this.load();
+        } catch (error) {
+            UI.showNotification(error.message, 'error');
+        }
+    }
+};
+
+// Фильтры магазина
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('#shop .tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('#shop .tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            ShopPage.currentCategory = btn.dataset.category;
+            ShopPage.load();
+        });
+    });
+});
+    </script>
+
+<!--    <script src="js/levels.js"></script>-->
+    <script>
+        const LevelsPage = {
+    async load() {
+        try {
+            const progress = await API.getLevelProgress();
+            this.render(progress);
+        } catch (error) {
+            console.error('Error loading levels:', error);
+        }
+    },
+
+    render(progress) {
+        const { current_level, next_level, xp_to_next, xp_in_current_level, progress_percent, is_max_level } = progress;
+
+        document.getElementById('current-level-emoji').textContent = current_level.emoji;
+        document.getElementById('current-level-name').textContent = current_level.name;
+        document.getElementById('level-description').textContent = current_level.description;
+
+        if (is_max_level) {
+            document.getElementById('level-progress-text').textContent = 'Максимальный уровень!';
+            document.getElementById('level-progress-bar').style.width = '100%';
+        } else {
+            document.getElementById('level-progress-text').textContent =
+                `${Math.floor(xp_in_current_level)} / ${xp_to_next} XP`;
+            document.getElementById('level-progress-bar').style.width = `${progress_percent}%`;
+        }
+    }
+};
+    </script>
+
+<!--    <script src="js/app.js"></script>-->
+    <script>
+        console.log('🍯 Honey Motivation загружается...');
+
+// Инициализация приложения
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('✅ DOM загружен');
+
+    // Проверить авторизацию
+    const token = API.getToken();
+    console.log('Токен:', token ? 'есть' : 'нет');
+
+    if (!token) {
+        console.log('Показываем экран входа');
+        UI.showLoginScreen();
+        return;
+    }
+
+    try {
+        console.log('Загружаем профиль...');
+        // Загрузить профиль
+        const profile = await API.getProfile();
+        API.setUser(profile);
+        UI.showMainScreen();
+        UI.updateUserInfo(profile);
+
+        // Загрузить дашборд
+        await DashboardPage.load();
+        console.log('✅ Профиль загружен');
+    } catch (error) {
+        console.error('❌ Ошибка загрузки профиля:', error);
+        UI.showLoginScreen();
+    }
+
+    // Форма входа
+    const loginForm = document.getElementById('login-form');
+    console.log('Форма входа:', loginForm ? 'найдена' : 'НЕ НАЙДЕНА');
+
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+            console.log('🔥 Клик по кнопке Войти!');
+            e.preventDefault();
+
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+
+            console.log('Логин:', username);
+            console.log('Пароль:', password ? 'есть' : 'нет');
+
+            try {
+                console.log('Отправляем запрос на сервер...');
+                await API.login(username, password);
+                console.log('✅ Успешный вход');
+
+                const profile = await API.getProfile();
+                API.setUser(profile);
+                UI.showMainScreen();
+                UI.updateUserInfo(profile);
+                await DashboardPage.load();
+                UI.showNotification('Добро пожаловать! 🍯', 'success');
+            } catch (error) {
+                console.error('❌ Ошибка входа:', error);
+                UI.showNotification(error.message, 'error');
+            }
+        });
+    }
+
+// Главная страница (дашборд)
+const DashboardPage = {
+    async load() {
+        try {
+            // Загрузить профиль
+            const profile = await API.getProfile();
+            API.setUser(profile);
+            UI.updateUserInfo(profile);
+
+            // Загрузить прогресс уровня
+            await LevelsPage.load();
+
+            // Загрузить стрик
+            const streak = await API.getStreak();
+            document.getElementById('current-streak').textContent = streak.current_streak;
+            document.getElementById('longest-streak').textContent = streak.longest_streak;
+
+            // Показать бонус стрика, если есть
+            if (streak.current_streak >= 3) {
+                document.getElementById('streak-bonus').classList.remove('hidden');
+                const multipliers = {
+                    3: 1.1, 7: 1.2, 14: 1.3, 30: 1.5, 60: 1.7, 100: 2.0
+                };
+                let multiplier = 1.0;
+                for (const [days, mult] of Object.entries(multipliers)) {
+                    if (streak.current_streak >= parseInt(days)) {
+                        multiplier = mult;
+                    }
+                }
+                document.getElementById('streak-multiplier').textContent = multiplier.toFixed(1);
+            }
+        } catch (error) {
+            UI.showNotification(error.message, 'error');
+        }
+    }
+};
+
+// Страница истории
+const HistoryPage = {
+    async load() {
+        try {
+            const completions = await API.getCompletions(30);
+            const purchases = await API.getPurchases();
+            const profile = API.getUser();
+
+            // Статистика
+            document.getElementById('total-stars-earned').textContent = Math.floor(profile.xp);
+            document.getElementById('total-tasks-completed').textContent = completions.length;
+            document.getElementById('total-purchases').textContent = purchases.length;
+
+            // История
+            const history = [
+                ...completions.map(c => ({
+                    type: 'task',
+                    title: `Задание выполнено`,
+                    value: `+${c.stars_earned.toFixed(1)} ⭐`,
+                    date: c.completed_at
+                })),
+                ...purchases.map(p => ({
+                    type: 'purchase',
+                    title: `Покупка`,
+                    value: `-${p.stars_spent.toFixed(1)} ⭐`,
+                    date: p.purchased_at
+                }))
+            ].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            this.render(history);
+        } catch (error) {
+            UI.showNotification(error.message, 'error');
+        }
+    },
+
+    render(history) {
+        const container = document.getElementById('history-list');
+
+        if (history.length === 0) {
+            container.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 40px;">История пуста</p>';
+            return;
+        }
+
+        container.innerHTML = history.slice(0, 50).map(item => `
+            <div class="history-item">
+                <div class="history-item-info">
+                    <div class="history-item-title">${item.title}</div>
+                    <div class="history-item-date">${UI.formatDate(item.date)}</div>
+                </div>
+                <div class="history-item-value">${item.value}</div>
+            </div>
+        `).join('');
+    }
+};
+
+// Инициализация приложения
+document.addEventListener('DOMContentLoaded', async () => {
+    // Проверить авторизацию
+    const token = API.getToken();
+    if (!token) {
+        UI.showLoginScreen();
+        return;
+    }
+
+    try {
+        // Загрузить профиль
+        const profile = await API.getProfile();
+        API.setUser(profile);
+        UI.showMainScreen();
+        UI.updateUserInfo(profile);
+
+        // Загрузить дашборд
+        await DashboardPage.load();
+    } catch (error) {
+        UI.showLoginScreen();
+    }
+
+    // Форма входа
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('login-username').value;
+        const password = document.getElementById('login-password').value;
+
+        try {
+            await API.login(username, password);
+            const profile = await API.getProfile();
+            API.setUser(profile);
+            UI.showMainScreen();
+            UI.updateUserInfo(profile);
+            await DashboardPage.load();
+            UI.showNotification('Добро пожаловать! 🍯', 'success');
+        } catch (error) {
+            UI.showNotification(error.message, 'error');
+        }
+    });
+
+    // Форма регистрации
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('register-username').value;
+        const password = document.getElementById('register-password').value;
+        const confirmPassword = document.getElementById('register-password-confirm').value;
+
+        if (password !== confirmPassword) {
+            UI.showNotification('Пароли не совпадают', 'error');
+            return;
+        }
+
+        try {
+            await API.register(username, password);
+            const profile = await API.getProfile();
+            API.setUser(profile);
+            UI.showMainScreen();
+            UI.updateUserInfo(profile);
+            await DashboardPage.load();
+            UI.showNotification('Регистрация успешна! 🎉', 'success');
+        } catch (error) {
+            UI.showNotification(error.message, 'error');
+        }
+    });
+
+    // Переключение форм
+    document.getElementById('show-register').addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('login-form').classList.add('hidden');
+        document.getElementById('register-form').classList.remove('hidden');
+    });
+
+    document.getElementById('show-login').addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('register-form').classList.add('hidden');
+        document.getElementById('login-form').classList.remove('hidden');
+    });
+
+    // Выход
+    document.getElementById('logout-btn').addEventListener('click', () => {
+        if (confirm('Выйти из аккаунта?')) {
+            API.clearAuth();
+            UI.showLoginScreen();
+        }
+    });
+});
+    </script>
+
 </body>
 </html>
