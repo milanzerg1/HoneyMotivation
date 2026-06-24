@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Honey Motivation 🍯</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+    <!-- Экран входа -->
+    <div id="login-screen" class="screen active">
+        <div class="login-container">
+            <div class="logo">
+                <span class="logo-emoji">🍯</span>
+                <h1>Honey Motivation</h1>
+                <p>Твоя сладкая система мотивации</p>
+            </div>
+            <form id="login-form" class="login-form">
+                <input type="text" id="login-username" placeholder="Имя пользователя" required>
+                <input type="password" id="login-password" placeholder="Пароль" required>
+                <button type="submit" class="btn btn-primary">Войти</button>
+                <p class="login-hint">Нет аккаунта? <a href="#" id="show-register">Зарегистрироваться</a></p>
+            </form>
+            <form id="register-form" class="login-form hidden">
+                <input type="text" id="register-username" placeholder="Имя пользователя" required>
+                <input type="password" id="register-password" placeholder="Пароль" required>
+                <input type="password" id="register-password-confirm" placeholder="Подтвердите пароль" required>
+                <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+                <p class="login-hint">Уже есть аккаунт? <a href="#" id="show-login">Войти</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Главный экран -->
+    <div id="main-screen" class="screen">
+        <!-- Шапка -->
+        <header class="header">
+            <div class="header-left">
+                <span class="logo-small">🍯</span>
+                <h2>Honey Motivation</h2>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <span id="user-stars" class="stat-badge">⭐ 0</span>
+                    <span id="user-level" class="stat-badge">Ур. 1</span>
+                </div>
+                <button id="logout-btn" class="btn-icon" title="Выйти">🚪</button>
+            </div>
+        </header>
+
+        <!-- Контент -->
+        <main class="content">
+            <!-- Дашборд -->
+            <section id="dashboard" class="page active">
+                <div class="welcome-card">
+                    <h2>Привет, <span id="user-name">друг</span>! 👋</h2>
+                    <p id="level-description">Твоя первая сладкая капля в большом пути</p>
+                </div>
+
+                <!-- Прогресс уровня -->
+                <div class="level-progress-card">
+                    <div class="level-header">
+                        <span id="current-level-emoji" class="level-emoji">🍯</span>
+                        <div class="level-info">
+                            <h3 id="current-level-name">Капля мёда</h3>
+                            <p id="level-progress-text">0 / 50 XP</p>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="level-progress-bar" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Стрик -->
+                <div class="streak-card">
+                    <div class="streak-header">
+                        <span class="streak-emoji">🔥</span>
+                        <div class="streak-info">
+                            <h3>Стрик: <span id="current-streak">0</span> дней</h3>
+                            <p>Рекорд: <span id="longest-streak">0</span> дней</p>
+                        </div>
+                    </div>
+                    <div id="streak-bonus" class="streak-bonus hidden">
+                        <span>Множитель: ×<span id="streak-multiplier">1.0</span></span>
+                    </div>
+                </div>
+
+                <!-- Быстрые действия -->
+                <div class="quick-actions">
+                    <button class="action-btn" data-page="tasks">
+                        <span class="action-icon">✅</span>
+                        <span>Задания</span>
+                    </button>
+                    <button class="action-btn" data-page="shop">
+                        <span class="action-icon">🏪</span>
+                        <span>Магазин</span>
+                    </button>
+                    <button class="action-btn" data-page="achievements">
+                        <span class="action-icon">🏆</span>
+                        <span>Достижения</span>
+                    </button>
+                    <button class="action-btn" data-page="history">
+                        <span class="action-icon">📊</span>
+                        <span>История</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Задания -->
+            <section id="tasks" class="page">
+                <div class="page-header">
+                    <h2>Задания ✅</h2>
+                    <div class="filter-tabs">
+                        <button class="tab-btn active" data-category="all">Все</button>
+                        <button class="tab-btn" data-category="daily">Ежедневные</button>
+                        <button class="tab-btn" data-category="weekly">Еженедельные</button>
+                        <button class="tab-btn" data-category="one_time">Разовые</button>
+                    </div>
+                </div>
+                <div id="tasks-list" class="tasks-list"></div>
+            </section>
+
+            <!-- Магазин -->
+            <section id="shop" class="page">
+                <div class="page-header">
+                    <h2>Магазин 🏪</h2>
+                    <div class="filter-tabs">
+                        <button class="tab-btn active" data-category="all">Все</button>
+                        <button class="tab-btn" data-category="small">Мелкие</button>
+                        <button class="tab-btn" data-category="medium">Средние</button>
+                        <button class="tab-btn" data-category="large">Большие</button>
+                        <button class="tab-btn" data-category="epic">Эпичные</button>
+                        <button class="tab-btn" data-category="special">Специальные</button>
+                    </div>
+                </div>
+                <div id="shop-list" class="shop-list"></div>
+            </section>
+
+            <!-- Достижения -->
+            <section id="achievements" class="page">
+                <div class="page-header">
+                    <h2>Достижения 🏆</h2>
+                </div>
+                <div id="achievements-list" class="achievements-list"></div>
+            </section>
+
+            <!-- История -->
+            <section id="history" class="page">
+                <div class="page-header">
+                    <h2>История 📊</h2>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-icon">⭐</span>
+                        <span class="stat-value" id="total-stars-earned">0</span>
+                        <span class="stat-label">Заработано звёзд</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-icon">✅</span>
+                        <span class="stat-value" id="total-tasks-completed">0</span>
+                        <span class="stat-label">Выполнено заданий</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-icon">🛍️</span>
+                        <span class="stat-value" id="total-purchases">0</span>
+                        <span class="stat-label">Покупок</span>
+                    </div>
+                </div>
+                <div id="history-list" class="history-list"></div>
+            </section>
+        </main>
+
+        <!-- Нижняя навигация -->
+        <nav class="bottom-nav">
+            <button class="nav-btn active" data-page="dashboard">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">Главная</span>
+            </button>
+            <button class="nav-btn" data-page="tasks">
+                <span class="nav-icon">✅</span>
+                <span class="nav-label">Задания</span>
+            </button>
+            <button class="nav-btn" data-page="shop">
+                <span class="nav-icon">🏪</span>
+                <span class="nav-label">Магазин</span>
+            </button>
+            <button class="nav-btn" data-page="achievements">
+                <span class="nav-icon">🏆</span>
+                <span class="nav-label">Достижения</span>
+            </button>
+            <button class="nav-btn" data-page="history">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">История</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Модальные окна -->
+    <div id="modal-overlay" class="modal-overlay hidden">
+        <div class="modal">
+            <button class="modal-close">&times;</button>
+            <div id="modal-content"></div>
+        </div>
+    </div>
+
+    <!-- Уведомления -->
+    <div id="notifications" class="notifications"></div>
+
+    <!-- Конфетти -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/tasks.js"></script>
+    <script src="js/shop.js"></script>
+    <script src="js/levels.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+/* ===== Мобильные устройства ===== */
+@media (max-width: 768px) {
+    .header {
+        padding: 0 15px;
+    }
+
+    .header-left h2 {
+        font-size: 16px;
+    }
+
+    .logo-small {
+        font-size: 24px;
+    }
+
+    .stat-badge {
+        padding: 4px 10px;
+        font-size: 12px;
+    }
+
+    .content {
+        padding: 15px;
+    }
+
+    .welcome-card h2 {
+        font-size: 20px;
+    }
+
+    .level-emoji {
+        font-size: 40px;
+    }
+
+    .level-info h3 {
+        font-size: 18px;
+    }
+
+    .quick-actions {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .action-btn {
+        padding: 15px;
+    }
+
+    .action-icon {
+        font-size: 28px;
+    }
+
+    .page-header h2 {
+        font-size: 24px;
+    }
+
+    .filter-tabs {
+        gap: 8px;
+    }
+
+    .tab-btn {
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+
+    .task-card,
+    .shop-card {
+        padding: 12px;
+        gap: 10px;
+    }
+
+    .task-icon,
+    .shop-icon {
+        font-size: 28px;
+    }
+
+    .task-title,
+    .shop-title {
+        font-size: 14px;
+    }
+
+    .task-complete-btn,
+    .shop-buy-btn {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+
+    .achievements-list {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 10px;
+    }
+
+    .achievement-card {
+        padding: 15px;
+    }
+
+    .achievement-emoji {
+        font-size: 36px;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+
+    .stat-card {
+        padding: 15px 10px;
+    }
+
+    .stat-icon {
+        font-size: 24px;
+    }
+
+    .stat-value {
+        font-size: 20px;
+    }
+
+    .stat-label {
+        font-size: 11px;
+    }
+
+    .notifications {
+        right: 10px;
+        left: 10px;
+    }
+
+    .notification {
+        min-width: auto;
+    }
+}
+
+/* ===== Очень маленькие экраны ===== */
+@media (max-width: 360px) {
+    .quick-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .user-info {
+        gap: 5px;
+    }
+
+    .stat-badge {
+        padding: 4px 8px;
+        font-size: 11px;
+    }
+}
+
+/* ===== Планшеты ===== */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .content {
+        max-width: 900px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .quick-actions {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* ===== Десктоп ===== */
+@media (min-width: 1025px) {
+    .content {
+        max-width: 1200px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .quick-actions {
+        grid-template-columns: repeat(4, 1fr);
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .tasks-list,
+    .shop-list {
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .achievements-list {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    }
+
+    .stats-grid {
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .history-list {
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
