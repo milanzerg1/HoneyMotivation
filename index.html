@@ -1093,7 +1093,7 @@
                 UI.showLoginScreen();
             }
 
-            try {
+            else try {
                 console.log('Загружаем профиль...');
                 const profile = await API.getProfile();
                 API.setUser(profile);
